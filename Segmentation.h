@@ -12,6 +12,7 @@ public:
 protected:
 	bool RegionGrow(MyMesh& mesh);
 	bool CheckAngle(const MyMesh& mesh, const Face& face, const MyMesh::Normal& pNormal, double theta);
+	bool CheckAngle(const MyMesh& mesh, const Face& face1, const Face& face2, double theta);
 	Face GetRandomFace(const std::set<Face>& faces);
 	MyMesh::Color GetRandomColor();
 	MyMesh::Normal GetPlaneNormal(const MyMesh& mesh, const Plane_3& plane, const Face& face);

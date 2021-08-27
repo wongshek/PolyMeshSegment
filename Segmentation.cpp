@@ -67,12 +67,16 @@ bool Segmentation::RegionGrow(MyMesh& mesh)
 			//neighbors.clear();
 			// Collect 1-ring faces for all seeds
 			std::set<Face> neighbors;
-			std::set<Face> new_neighbors;
+			std::map<Face, Face> map_face_seed;
 			for (const auto& seed : seeds)
 			{
 				// Collect faces
-				new_neighbors = GetOneRingFaces(mesh, seed);
+				std::set<Face> new_neighbors = GetOneRingFaces(mesh, seed);
 				neighbors.insert(new_neighbors.begin(), new_neighbors.end());
+				for (const auto& nn : new_neighbors)
+				{
+					map_face_seed[nn] = seed;
+				}
 			}
 			seeds.clear();
 
@@ -85,7 +89,8 @@ bool Segmentation::RegionGrow(MyMesh& mesh)
 				if (is_visited)	continue;
 
 				// Check distance and angle
-				bool is_angle_fitting = CheckAngle(mesh, neighbor, pNormal, m_ang_thres);
+				//bool is_angle_fitting = CheckAngle(mesh, neighbor, pNormal, m_ang_thres);
+				bool is_angle_fitting = CheckAngle(mesh, neighbor, map_face_seed[neighbor], m_ang_thres);
 				if (is_angle_fitting)
 				{
 					// Add face to current region
@@ -137,6 +142,16 @@ bool Segmentation::CheckAngle(const MyMesh& mesh, const Face& face, const MyMesh
 	MyMesh::Normal fNormal = mesh.normal(face); // Already Normalize
 
 	double angle = std::acos((fNormal.dot(pNormal))) * 180 / CGAL_PI;
+
+	return angle < theta;
+}
+
+bool Segmentation::CheckAngle(const MyMesh& mesh, const Face& face1, const Face& face2, double theta)
+{
+	MyMesh::Normal fNormal1 = mesh.normal(face1); // Already Normalize
+	MyMesh::Normal fNormal2 = mesh.normal(face2); // Already Normalize
+
+	double angle = std::acos((fNormal1.dot(fNormal2))) * 180 / CGAL_PI;
 
 	return angle < theta;
 }
